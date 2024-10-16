@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Connect</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Lock Screen Style */
+        #lock-screen {
+            background-color: black;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 2;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        #unlock-input {
+            margin-top: 30px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        /* Desktop Style */
+        #desktop {
+            background-color: black; /* Black background for the desktop */
+            display: none; /* Hidden by default */
+            height: 100vh;
+            position: relative;
+            width: 100%;
+        }
+
+        /* File Icon Style */
+        .file-icon {
+            position: absolute;
+            left: 50px;
+            top: 50px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .file-icon img {
+            width: 50px;
+            height: 50px;
+        }
+
+        /* Terminal Window Style */
+        #terminal {
+            width: 400px;
+            height: 300px;
+            background-color: black;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            border: 2px solid white; /* White border for terminal */
+            cursor: move;
+            display: none; /* Hidden by default */
+        }
+
+        #terminal-content {
+            color: white;
+            padding: 10px;
+        }
+
+        #terminal-input {
+            width: 90%;
+            padding: 5px;
+            color: white;
+            background: black;
+            border: none;
+            border-top: 1px solid white;
+        }
+
+        /* Close Button Style */
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            background-color: black;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+        }
+
+        #loading-spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 2s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Blackout Screen */
+        #blackout-screen {
+            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <div id="lock-screen">
+        <h1>PC Connect</h1>
+        <h2>PC24</h2>
+        <input type="password" id="unlock-input" placeholder="Enter password" />
+        <button onclick="unlock()">Unlock</button>
+    </div>
+
+    <div id="desktop">
+        <div class="file-icon" onclick="openTerminal()">
+            <img src="https://cdn-icons-png.flaticon.com/512/2933/2933245.png" alt="PC Icon" />
+            <p style="color:white;">Terminal</p>
+        </div>
+
+        <div id="terminal">
+            <div class="close-btn" onclick="closeTerminal()">X</div>
+            <div id="terminal-content">
+                <input id="terminal-input" type="text" placeholder="Help on infopcconnect@gmail.com" onkeypress="handleCommand(event)">
+            </div>
+        </div>
+    </div>
+
+    <div id="loading-screen">
+        <div id="loading-spinner"></div>
+        <p>Shutting down...</p>
+    </div>
+
+    <div id="blackout-screen"></div>
+
+    <script>
+        function unlock() {
+            const password = document.getElementById("unlock-input").value;
+            if (password === "pcconnectstrongprotect") {
+                document.getElementById("lock-screen").style.display = "none";
+                document.getElementById("desktop").style.display = "block";
+            } else {
+                alert("Incorrect password! Try again.");
+            }
+        }
+
+        function openTerminal() {
+            document.getElementById("terminal").style.display = "block";
+            document.getElementById("terminal-input").focus(); // Automatically focus the input when opening terminal
+            dragElement(document.getElementById("terminal"));
+        }
+
+        function closeTerminal() {
+            document.getElementById("terminal").style.display = "none";
+        }
+
+        function handleCommand(event) {
+            if (event.key === "Enter") {
+                const input = event.target.value.toLowerCase();
+                if (input === "shutdown") {
+                    showLoadingScreen();
+                } else {
+                    alert("Unavailable command!");
+                }
+                event.target.value = ""; // Clear input field
+            }
+        }
+
+        function showLoadingScreen() {
+            document.getElementById("loading-screen").style.display = "flex";
+            setTimeout(() => {
+                document.getElementById("loading-screen").style.display = "none";
+                document.getElementById("blackout-screen").style.display = "block";
+            }, 2000); // 2 seconds loading, then blackout
+        }
+
+        /* Function to make the terminal moveable */
+        function dragElement(elmnt) {
+            var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            if (document.getElementById(elmnt.id + "header")) {
+                /* If present, the header is where you move the DIV from: */
+                document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+            } else {
+                /* Otherwise, move the DIV from anywhere inside the DIV: */
+                elmnt.onmousedown = dragMouseDown;
+            }
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // Get the mouse cursor position at startup:
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                // Call a function whenever the cursor moves:
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // Calculate the new cursor position:
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                // Set the element's new position:
+                elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+                elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                /* Stop moving when mouse button is released: */
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+    </script>
+</body>
+</html>
